@@ -15,8 +15,13 @@
   "dependencies": {
     "@discordx/importer": "^1.1.10",
     "@discordx/pagination": "^3.3.1",
-    "discord.js": "^14.6.0",
-    "discordx": "^11.4.0"
+    "discord.js": "^14.7.1",
+    "discordx": "^11.4.0",
+    "dotenv": "^16.0.3",
+    "he": "^1.2.0",
+    "node-fetch": "^3.3.0",
+    "random-seed": "^0.3.0",
+    "sqlite3": "^5.1.2"
   },
   "devDependencies": {
     "@types/node": "^18.11.7",
