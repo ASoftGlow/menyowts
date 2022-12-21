@@ -5,6 +5,6 @@ import { Discord, On } from "discordx";
 export class Example {
   @On()
   messageDelete([message]: ArgsOf<"messageDelete">, client: Client): void {
-    console.log("Message Deleted", client.user?.username, message.content);
+    console.log("Message Deleted", message.author?.username, message.content);
   }
 }

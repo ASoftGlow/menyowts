@@ -1,7 +1,7 @@
 import { verbose } from 'sqlite3';
 const sqlite3 = verbose();
 const db = new sqlite3.Database('./assets/main.db');
-import { UsersTableType } from './assets/DatabaseTypes.js';
+import { UsersTableRow } from './assets/DatabaseTypes.js';
 
 
 db.serialize(() => {
@@ -13,7 +13,7 @@ db.serialize(() => {
     // }
     // stmt.finalize();
 
-    db.get('SELECT id,level FROM users WHERE id=412350076065677313', function (err: Error, row: UsersTableType) {
+    db.get('SELECT id,level FROM users WHERE id=412350076065677313', function (err: Error, row: UsersTableRow) {
         if (err) throw err;
         console.log(typeof (row.id));
     });

@@ -9,7 +9,7 @@ import {
   userMention,
 } from "discord.js";
 import { Discord, Slash, SlashOption } from "discordx";
-import { UsersTableType } from '../assets/DatabaseTypes.js';
+import { UsersTableRow } from '../assets/DatabaseTypes.js';
 import { ranks } from '../assets/Ranks.js';
 import { expBar } from '../utils/ProgressBar.js';
 import { Emojis } from '../assets/Emojis.js';
@@ -45,7 +45,7 @@ export class Example {
     db.get(
       "SELECT coins, message_count, level, exp, job_id, rank, correct_trivia, incorrect_trivia, trivia_streak FROM users WHERE id=?",
       (member.id),
-      async (err: Error | null, row: UsersTableType | undefined) => {
+      async (err: Error | null, row: UsersTableRow | undefined) => {
         if (err) throw err;
         if (!row) {
           await interaction.followUp(`${userMention(interaction.client.application.owner?.id!)}, ${member.id} is not in the database yet`);
@@ -87,7 +87,8 @@ export class Example {
                 `Incorrect: ${row.incorrect_trivia}\n` +
                 `Streak: ${row.trivia_streak}\n`
               )
-            })]
+            })
+          ]
         });
       }
     );

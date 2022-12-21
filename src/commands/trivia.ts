@@ -11,8 +11,6 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  SnowflakeUtil,
-  Snowflake
 } from "discord.js";
 import {
   Discord,
@@ -24,6 +22,7 @@ import pkg from 'he';
 const { decode } = pkg;
 import { randomElement } from './../utils/RandomElement.js';
 import { shuffleArray } from './../utils/ShuffleArray.js';
+import { levelupCheck } from '../utils/LevelupChecks.js';
 import { authorAvatarOptions } from "../assets/AvatarOptions.js";
 import {
   TriviaDifficulty,
@@ -32,7 +31,7 @@ import {
   TriviaResponse,
   TriviaData
 } from './../assets/TriviaTypes.js';
-import { UsersTableType } from '../assets/DatabaseTypes.js';
+import { UsersTableRow } from '../assets/DatabaseTypes.js';
 import { stringFormatter, db } from './../main.js';
 // const rand = require('random-seed').create()
 
@@ -227,7 +226,7 @@ export class Trivia {
 
   @ButtonComponent({ id: /trivia-(correct|incorrect-\d+)/ })
   async answerBtnsHandler(interaction: ButtonInteraction) {
-    console.log(interaction.customId, interaction.member?.user.username);
+    // console.log(interaction.customId, interaction.member?.user.username);
     const data = this.data.get(interaction.message.id)!;
     // cancel timeout
     clearTimeout(data.timeout);
@@ -251,10 +250,12 @@ export class Trivia {
           $id: interaction.user.id
         },
         function (err) { if (err) throw err; })
-        .get("SELECT trivia_streak FROM users WHERE id=?", [interaction.user.id], (err: Error, row: UsersTableType) => {
+        .get("SELECT trivia_streak FROM users WHERE id=?", [interaction.user.id], (err: Error, row: UsersTableRow) => {
           if (err) throw err;
           streak = row.trivia_streak;
         });
+
+      await levelupCheck(db, (interaction.member as GuildMember));
     }
     else {
       db.run("UPDATE users SET incorrect_trivia=incorrect_trivia+1, trivia_streak=0 WHERE id=?", [interaction.user.id]);

@@ -13,10 +13,9 @@ import { stringFormatter } from './../main.js';
 @Discord()
 export class Example {
   @Slash({ 
-    description: "Can only be used by <@&1003471698168918106>s", 
+    description: "Can only be used by Tacocat", 
     name: "ban"
   })
-  //TODO: add role
   //TODO: cooldown
   async band(
     @SlashOption({

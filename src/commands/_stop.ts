@@ -6,7 +6,11 @@ import {db} from '../main.js'
 
 @Discord()
 export class Example {
-  @Slash({ name: "_stop", description: "Admin-only; destroys client" })
+  @Slash({ 
+    name: "_stop", 
+    description: "Admin-only; destroys client",
+    defaultMemberPermissions: "Administrator"
+  })
   async stop(
     interaction: CommandInteraction
   ): Promise<void> {

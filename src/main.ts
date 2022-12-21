@@ -1,19 +1,20 @@
 import { dirname, importx } from "@discordx/importer";
-import { EmbedBuilder, Interaction, Message } from "discord.js";
-import { IntentsBitField } from "discord.js";
+import { Interaction, InteractionType } from "discord.js";
+import { IntentsBitField, Message, EmbedBuilder } from "discord.js";
 import { Client } from "discordx";
 import { config as load_envs } from 'dotenv';
 import _splite3_pkg from 'sqlite3';
-import { expBar } from "./utils/ProgressBar.js";
+import { Dialog } from "./assets/Dialog.js";
+import { ranks } from "./assets/Ranks.js";
 const sqlite3 = _splite3_pkg.verbose();
 import { StringFormatter, FormatterMode } from './utils/StringFormatter.js';
 
 load_envs();
 
 
-export const stringFormatter = new StringFormatter(FormatterMode.normal);
+export const stringFormatter = new StringFormatter();
 
-export const bot = new Client({
+export const client = new Client({
   // To use only guild command
   botGuilds: ['809179222551429150'],
 
@@ -32,13 +33,13 @@ export const bot = new Client({
 
 export const db = new sqlite3.Database('.\\src\\assets\\main.db');
 
-bot.once("ready", async () => {
+client.once("ready", async () => {
   // Make sure all guilds are cached
   // await bot.guilds.fetch();
 
   // Synchronize applications commands with Discord
-  bot.user!.setStatus('invisible');
-  await bot.initApplicationCommands();
+  client.user!.setStatus('dnd');
+  await client.initApplicationCommands();
 
   // To clear all guild commands, uncomment this line,
   // This is useful when moving from guild commands to global commands
@@ -51,25 +52,45 @@ bot.once("ready", async () => {
   console.log("Bot started");
 });
 
-bot.on("interactionCreate", (interaction: Interaction) => {
-  bot.executeInteraction(interaction);
+client.on("interactionCreate", (interaction: Interaction) => {
+  if (interaction.type === InteractionType.ApplicationCommand) {
+    db.run("UPDATE users SET exp=exp+1 WHERE id=$id",
+      {
+        $id: interaction.user.id
+      },
+      (err: Error | null) => {
+        if (err) throw err;
+      });
+  }
+
+  client.executeInteraction(interaction);
 });
 
-// bot.on("messageCreate", async (message: Message) => {
-//   if (message.author.id === '774980691016024085')
-//     await message.reply({
-//       embeds: [
-//         new EmbedBuilder()
-//           .setDescription(stringFormatter.formatD(
-//             `${'a'} ${row.coins} \n` +
-//             `${Emojis.Level} ${row.level} \n` +
-//             `${Emojis.Messages} ${row.message_count} \n` +
-//             `${rank.emoji} ${rank.name} \n` +
-//             `${Emojis.Zap} ${expBar(row.exp, row.level)}`
-//             , false))
-//       ]
-//     });
-// });
+
+client.on("emojiCreate", (emoji) => {
+  db.run("UPDATE users SET exp=exp+10 WHERE id=$id",
+    {
+      $id: emoji.author?.id!
+    },
+    (err: Error | null) => {
+      if (err) throw err;
+    });
+});
+
+client.on("inviteCreate", async (invite) => {
+  const me = client.users.cache.get("774980691016024085")!;
+  await me.send(`${invite.inviter?.username} has created an invite!`);
+});
+
+client.on("messageReactionAdd", (reaction, user) => {
+  db.run("UPDATE users SET exp=exp+1 WHERE id=$id",
+    {
+      $id: user.id
+    },
+    (err: Error | null) => {
+      if (err) throw err;
+    });
+});
 
 (async () => {
   // The following syntax should be used in the commonjs environment
@@ -85,5 +106,5 @@ bot.on("interactionCreate", (interaction: Interaction) => {
   }
 
   // Log in with your bot token
-  await bot.login(process.env.BOT_TOKEN);
+  await client.login(process.env.BOT_TOKEN);
 })();
