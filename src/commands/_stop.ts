@@ -1,4 +1,4 @@
-import type { CommandInteraction } from "discord.js";
+import { CommandInteraction, time, TimestampStyles } from "discord.js";
 import { Discord, Slash } from "discordx";
 import { TimeFormatter } from '../utils/TimeFormatter.js';
 import {db} from '../main.js'
@@ -15,7 +15,7 @@ export class Example {
     interaction: CommandInteraction
   ): Promise<void> {
     await interaction.reply({
-      content: 'Stopping after ' + TimeFormatter.parseMilliseconds(interaction.client.uptime),
+      content: 'Stopping after ' + time(Math.floor((Date.now()-interaction.client.uptime)/1000), TimestampStyles.RelativeTime),
       ephemeral: true
     });
 

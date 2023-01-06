@@ -23,7 +23,7 @@ export class Example {
     if (message.mentions.users.has(client.user?.id!)) {
       if (message.content.toLowerCase().includes('what do we do around here?')) {
         await message.channel.send(
-          message.member?.displayName + stringFormatter.format(`, sometimes we do a *little* trolling in these parts.`)
+          message.member?.displayName + stringFormatter.format(`, sometimes we do a *little trolling* in these parts.`)
         );
       }
       else {

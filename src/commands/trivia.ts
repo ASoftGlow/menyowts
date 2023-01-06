@@ -220,6 +220,7 @@ export class Trivia {
     //   clearTimeout(this.timers.get(first_key))
     //   this.timers.delete(first_key)
     // }
+    
     await this.sendQuestion(interaction);
   };
 

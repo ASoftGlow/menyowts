@@ -4,11 +4,8 @@ import { IntentsBitField, Message, EmbedBuilder } from "discord.js";
 import { Client } from "discordx";
 import { config as load_envs } from 'dotenv';
 import _splite3_pkg from 'sqlite3';
-import { Dialog } from "./assets/Dialog.js";
-import { ranks } from "./assets/Ranks.js";
 const sqlite3 = _splite3_pkg.verbose();
 import { StringFormatter, FormatterMode } from './utils/StringFormatter.js';
-
 load_envs();
 
 

@@ -7,6 +7,7 @@ import {
 import { Database } from 'sqlite3';
 import { UsersTableRow } from '../assets/DatabaseTypes.js';
 import { Rank, ranks } from '../assets/Ranks.js';
+import { stringFormatter } from '../main.js';
 
 
 export function getRank(level: number): Rank | undefined {
@@ -28,7 +29,7 @@ async function upgradeRank(db: Database, member: GuildMember, oldRank: Rank, new
     const _channel = member.guild.channels.cache.get("832283357323984917")!;
     if (_channel.type !== ChannelType.GuildText) return;
     const showAndTellChannel: TextChannel = _channel;
-    await showAndTellChannel.send(`${userMention(member.id)} has ranked up to ${newRank.name}!`);
+    await showAndTellChannel.send(stringFormatter.formatD(`${userMention(member.id)} has ranked up to ${newRank.name}!`));
   }
   else {
     console.log(`${member.user.username} ranked up to ${newRank.name}`);

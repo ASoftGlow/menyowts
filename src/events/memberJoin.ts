@@ -2,7 +2,7 @@ import type { ArgsOf, Client } from "discordx";
 import { Discord, On } from "discordx";
 import { EmbedBuilder } from 'discord.js';
 import { ranks } from "../assets/Ranks.js";
-import { db } from "../main.js";
+import { db, stringFormatter } from "../main.js";
 
 
 @Discord()
@@ -23,7 +23,7 @@ export class Example {
           const embed = new EmbedBuilder()
             .setColor(0xc39341)
             .setThumbnail(member.avatarURL({ size: 256 }))
-            .setTitle(`${member.displayName} has been recruited!`);
+            .setTitle(member.displayName + stringFormatter.format(` has been recruited!`));
 
           await member.guild.systemChannel?.send({
             embeds: [embed]
@@ -39,7 +39,7 @@ export class Example {
           const embed = new EmbedBuilder()
             .setColor(0xc39341)
             .setThumbnail(member.avatarURL({ size: 256 }))
-            .setTitle(`Welcome back, ${member.displayName}!`);
+            .setTitle(stringFormatter.format(`Welcome back, `, false) + member.displayName + stringFormatter.format('!'));
 
           await member.guild.systemChannel?.send({
             embeds: [embed]

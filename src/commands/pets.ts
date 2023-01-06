@@ -3,7 +3,7 @@ import { ApplicationCommandOptionType, CommandInteraction, GuildMember } from "d
 import { EmbedBuilder } from "discord.js";
 import { Discord, Slash, SlashOption } from "discordx";
 import { PetsTableRow } from "../assets/DatabaseTypes.js";
-import { db } from "../main.js";
+import { db, stringFormatter } from "../main.js";
 import { LanguageUtils } from "../utils/LanguageUtils.js";
 
 
@@ -27,7 +27,7 @@ export class SlashExample {
     if (member === undefined) member = (interaction.member as GuildMember);
     if (member.user.bot) {
       await interaction.reply({
-        content: "Bots don't have pets.",
+        content: stringFormatter.format("Bots don't have pets."),
         ephemeral: true
       });
       return;
@@ -64,7 +64,7 @@ export class SlashExample {
               }
             )
             .setTitle(`**${LanguageUtils.makePossessive(member?.displayName!)} Pets**`)
-            .setFooter({ text: `Page ${i + 1} of ${rows.length}` });
+            .setFooter({ text: stringFormatter.format(`Page ${i + 1} of ${rows.length}`) });
 
           return { embeds: [embed] };
         });

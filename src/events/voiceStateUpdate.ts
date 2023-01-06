@@ -11,7 +11,6 @@ export class VoiceStateHandler {
    */
   private cache = new Map<string, number[][]>();
 
-
   /**
    * Gives rewards based on how long a user is unmuted and undeafened in a vc.
    */
@@ -26,13 +25,18 @@ export class VoiceStateHandler {
     if (oldState.channel && newState.channel) {
       // afk
       if (newState.mute || newState.deaf) {
-        // if (timestamps[timestamps.length-1].length === 1) {
+        if (!timestamps) return; // joined before bot online
+
         timestamps[timestamps.length - 1].push(current_time);
         this.cache.set(member.id, timestamps);
-        // }
       }
       // back
       else if (oldState.mute || oldState.deaf) {
+        if (!timestamps) { // joined before bot online
+          this.cache.set(member.id, [[current_time]]);
+          return;
+        }
+
         timestamps.push([current_time]);
         this.cache.set(member.id, timestamps);
       }
@@ -41,6 +45,7 @@ export class VoiceStateHandler {
 
     // left
     if (!newState.channel) {
+      if (!timestamps) return; // joined before bot online
       // end time
       timestamps[timestamps.length - 1].push(current_time);
       // get total time and reward
@@ -51,7 +56,7 @@ export class VoiceStateHandler {
         let diff = v[1] - v[0];
         totalTime += diff;
       });
-      
+
       var amount = Math.round(totalTime / (60 * 4));
       amount += 5;
       if (amount > 30) amount = 30;
