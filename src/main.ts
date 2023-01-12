@@ -1,10 +1,11 @@
 import { dirname, importx } from "@discordx/importer";
-import { Interaction, InteractionType } from "discord.js";
+import { GuildMember, Interaction, InteractionType } from "discord.js";
 import { IntentsBitField, Message, EmbedBuilder } from "discord.js";
 import { Client } from "discordx";
 import { config as load_envs } from 'dotenv';
-import _splite3_pkg from 'sqlite3';
-const sqlite3 = _splite3_pkg.verbose();
+import __splite3_pkg from 'sqlite3';
+const sqlite3 = __splite3_pkg.verbose();
+import { levelupCheck } from "./utils/LevelupChecks.js";
 import { StringFormatter, FormatterMode } from './utils/StringFormatter.js';
 load_envs();
 
@@ -28,6 +29,7 @@ export const client = new Client({
   silent: true,
 });
 
+/**SQLite Database */
 export const db = new sqlite3.Database('.\\src\\assets\\main.db');
 
 client.once("ready", async () => {
@@ -55,8 +57,9 @@ client.on("interactionCreate", (interaction: Interaction) => {
       {
         $id: interaction.user.id
       },
-      (err: Error | null) => {
+      async (err: Error | null) => {
         if (err) throw err;
+        await levelupCheck(db, (interaction.member as GuildMember));
       });
   }
 
@@ -65,12 +68,14 @@ client.on("interactionCreate", (interaction: Interaction) => {
 
 
 client.on("emojiCreate", (emoji) => {
+  const member = emoji.guild.members.cache.get(emoji.author?.id!);
   db.run("UPDATE users SET exp=exp+10 WHERE id=$id",
     {
       $id: emoji.author?.id!
     },
-    (err: Error | null) => {
+    async (err: Error | null) => {
       if (err) throw err;
+      await levelupCheck(db, member!);
     });
 });
 
@@ -80,12 +85,18 @@ client.on("inviteCreate", async (invite) => {
 });
 
 client.on("messageReactionAdd", (reaction, user) => {
+  console.log('a');
+  if (!reaction.message.guild) return;
+  const member = reaction.message.guild.members.cache.get(user.id);
+  console.log('b');
   db.run("UPDATE users SET exp=exp+1 WHERE id=$id",
     {
       $id: user.id
     },
-    (err: Error | null) => {
+    async (err: Error | null) => {
       if (err) throw err;
+      console.log(member?.nickname);
+      await levelupCheck(db, member!);
     });
 });
 

@@ -3,6 +3,7 @@ import type { ArgsOf, Client } from "discordx";
 import { Discord, On } from "discordx";
 import { Dialog } from "../assets/Dialog.js";
 import { db, stringFormatter } from "../main.js";
+import { levelupCheck } from "../utils/LevelupChecks.js";
 
 
 @Discord()
@@ -44,8 +45,9 @@ export class Example {
         $amount: amount,
         $id: message.author.id
       },
-      (err: Error | null) => {
+      async (err: Error | null) => {
         if (err) throw err;
+        await levelupCheck(db, message.member!);
       });
   }
 }

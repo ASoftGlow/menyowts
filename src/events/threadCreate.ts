@@ -2,6 +2,7 @@ import type { ArgsOf, Client } from "discordx";
 import { Discord, On } from "discordx";
 import { UsersTableRow } from "../assets/DatabaseTypes.js";
 import { db } from "../main.js";
+import { levelupCheck } from "../utils/LevelupChecks.js";
 
 
 @Discord()
@@ -12,10 +13,11 @@ export class Example {
 
     thread.join();
 
-    db.run("UPDATE users SET threads=threads-1 WHERE id=?",
+    db.run("UPDATE users SET threads=threads-1, exp=exp+20 WHERE id=?",
       [thread.ownerId],
-      (err: Error | null) => {
+      async (err: Error | null) => {
         if (err) throw err;
+        await levelupCheck(db, thread.guildMembers.get(thread.ownerId!)!)
 
         db.get("SELECT threads FROM users WHERE id=?",
           [thread.ownerId],

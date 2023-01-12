@@ -2,7 +2,8 @@ import {
   GuildMember,
   TextChannel,
   ChannelType,
-  userMention
+  userMention,
+  Guild
 } from 'discord.js';
 import { Database } from 'sqlite3';
 import { UsersTableRow } from '../assets/DatabaseTypes.js';
@@ -16,13 +17,13 @@ export function getRank(level: number): Rank | undefined {
 
 async function upgradeRank(db: Database, member: GuildMember, oldRank: Rank, newRank: Rank, quiet: boolean = false): Promise<void> {
   db.run("UPDATE users SET rank=$rank WHERE id=$id",
-    { $rank: newRank, $id: member.id },
+    { $rank: newRank.id, $id: member.id },
     (err: Error | null) => { if (err) throw err; });
 
-  let role = member.guild.roles.cache.get(newRank.name)!;
+  let role = member.guild.roles.cache.get(newRank.roleID)!;
   await member.roles.add(role, "Rankup");
 
-  role = member.guild.roles.cache.get(oldRank.name)!;
+  role = member.guild.roles.cache.get(oldRank.roleID)!;
   await member.roles.remove(role, "Rankup");
 
   if (!quiet) {
@@ -37,29 +38,83 @@ async function upgradeRank(db: Database, member: GuildMember, oldRank: Rank, new
 }
 
 
-export async function levelupCheck(db: Database, member: GuildMember) {
-  if (member.user.bot) return;
+export enum LevelupCheckStatus {
+  NO_CHANGE,
+  LEVELUP,
+  RANKUP
+}
 
-  db.get("SELECT level, exp FROM users WHERE id=?", [member.id], async (err: Error | null, row: UsersTableRow) => {
-    if (err) throw err;
-    const level_goal = 100 * row.level + 100;
+export async function levelupCheck(db: Database, member: GuildMember): Promise<LevelupCheckStatus | null> {
+  if (member.user.bot) return null;
 
-    if (row.exp >= level_goal) {
-      db.run("UPDATE users SET exp=exp+$amount, level=level+1 WHERE id=$id",
-        {
-          $amount: -level_goal,
-          $id: member.id
-        },
-        (err: Error | null) => { if (err) throw err; });
-      row.level += 1;
+  return new Promise((resolve, reject) => {
+    console.log(member.id);
+    db.get("SELECT level, exp FROM users WHERE id=?", [member.id], async (err: Error | null, row: UsersTableRow) => {
+      if (err) throw err;
+      console.log(row);
+      const level_goal = 100 * (row.level + 1);
 
-      // rank up
-      if (row.level % 3 === 0 && row.level > 0 && row.level / 3 <= ranks.size - 1) {
-        const newRank = getRank(row.level)!;
-        const oldRank = getRank(row.level - 1)!;
+      if (row.exp >= level_goal) {
+        db.run("UPDATE users SET exp=exp+$amount, level=level+1 WHERE id=$id",
+          {
+            $amount: -level_goal,
+            $id: member.id
+          },
+          (err: Error | null) => { if (err) throw err; });
+        row.level += 1;
 
-        await upgradeRank(db, member, oldRank, newRank);
+        // rank up
+        if (row.level % 3 === 0 && row.level > 0 && row.level / 3 <= ranks.size - 1) {
+          const newRank = getRank(row.level)!;
+          const oldRank = getRank(row.level - 1)!;
+
+          //await upgradeRank(db, member, oldRank, newRank);
+          resolve(LevelupCheckStatus.RANKUP);
+        }
+        else {
+          resolve(LevelupCheckStatus.LEVELUP);
+        }
+      } else {
+        resolve(LevelupCheckStatus.NO_CHANGE);
       }
-    }
+    });
+  });
+}
+
+export async function levelupCheckAll(db: Database, guild: Guild): Promise<LevelupCheckStatus[]> {
+  return new Promise((resolve, reject) => {
+
+    db.all("SELECT level, exp FROM users", async (err: Error | null, rows: UsersTableRow[]) => {
+      if (err) throw err;
+
+      resolve(Promise.all(rows.map(async (row) => {
+        const level_goal = 100 * (row.level + 1);
+
+        if (row.exp >= level_goal) {
+          db.run("UPDATE users SET exp=exp+$amount, level=level+1 WHERE id=$id",
+            {
+              $amount: -level_goal,
+              $id: row.id
+            },
+            (err: Error | null) => { if (err) throw err; });
+          row.level += 1;
+
+          // rank up
+          if (row.level % 3 === 0 && row.level > 0 && row.level / 3 <= ranks.size - 1) {
+            const newRank = getRank(row.level)!;
+            const oldRank = getRank(row.level - 1)!;
+            const member = guild.members.cache.get(row.id)!;
+
+            await upgradeRank(db, member, oldRank, newRank);
+            return LevelupCheckStatus.RANKUP;
+          }
+          else {
+            return LevelupCheckStatus.LEVELUP;
+          }
+        } else {
+          return LevelupCheckStatus.NO_CHANGE;
+        }
+      })));
+    });
   });
 }

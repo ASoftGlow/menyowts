@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 import { EmbedBuilder } from "discord.js";
 import { ButtonComponent, Discord, Slash } from "discordx";
-import { Emojis, PlaybackEmojis } from "../assets/Emojis.js";
+import { Emojis, CustomEmojis } from "../assets/Emojis.js";
 import { Shop } from "../assets/shop/Shop.js";
 import { shops, shopsList } from "../assets/shop/shops.js";
 
@@ -23,11 +23,11 @@ export class ShopCommand {
     .setStyle(ButtonStyle.Success);
 
   static readonly nextItemBtn = new ButtonBuilder()
-    .setEmoji(PlaybackEmojis.Skip)
+    .setEmoji(CustomEmojis.PlaybackEmojis.Skip)
     .setStyle(ButtonStyle.Secondary)
     .setCustomId('yr2uh');
   static readonly lastItemBtn = new ButtonBuilder()
-    .setEmoji(PlaybackEmojis.Back)
+    .setEmoji(CustomEmojis.PlaybackEmojis.Back)
     .setStyle(ButtonStyle.Secondary)
     .setCustomId('ydr2uh');
 
