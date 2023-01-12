@@ -68,7 +68,7 @@ export async function levelupCheck(db: Database, member: GuildMember): Promise<L
           const newRank = getRank(row.level)!;
           const oldRank = getRank(row.level - 1)!;
 
-          //await upgradeRank(db, member, oldRank, newRank);
+          await upgradeRank(db, member, oldRank, newRank);
           resolve(LevelupCheckStatus.RANKUP);
         }
         else {
