@@ -48,12 +48,10 @@ export async function levelupCheck(db: Database, member: GuildMember): Promise<L
   if (member.user.bot) return null;
 
   return new Promise((resolve, reject) => {
-    console.log(member.id);
     db.get("SELECT level, exp FROM users WHERE id=?", [member.id], async (err: Error | null, row: UsersTableRow) => {
       if (err) throw err;
-      console.log(row);
       const level_goal = 100 * (row.level + 1);
-
+      
       if (row.exp >= level_goal) {
         db.run("UPDATE users SET exp=exp+$amount, level=level+1 WHERE id=$id",
           {
