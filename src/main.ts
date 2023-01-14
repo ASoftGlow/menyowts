@@ -31,7 +31,7 @@ export const client = new Client({
 });
 
 /**SQLite Database */
-export const db = new sqlite3.Database('C:\\Users\\hankv\\Downloads\\main.db');
+export const db = new sqlite3.Database('main.db');
 
 client.once("ready", async () => {
   // Make sure all guilds are cached
