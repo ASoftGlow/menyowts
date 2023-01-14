@@ -8,10 +8,12 @@ import { levelupCheck } from "../utils/LevelupChecks.js";
 @Discord()
 export class Example {
   @On({ event: "threadCreate" })
-  handleThreadCreate([thread, isNew]: ArgsOf<"threadCreate">, client: Client): void {
+  async handleThreadCreate([thread, isNew]: ArgsOf<"threadCreate">, client: Client): Promise<void> {
     if (thread.joined || !isNew) return;
 
     thread.join();
+
+    if ((await thread.fetchOwner())?.guildMember?.permissions.has("Administrator")) return;
 
     db.run("UPDATE users SET threads=threads-1, exp=exp+20 WHERE id=?",
       [thread.ownerId],

@@ -51,7 +51,7 @@ export async function levelupCheck(db: Database, member: GuildMember): Promise<L
     db.get("SELECT level, exp FROM users WHERE id=?", [member.id], async (err: Error | null, row: UsersTableRow) => {
       if (err) throw err;
       const level_goal = 100 * (row.level + 1);
-      
+
       if (row.exp >= level_goal) {
         db.run("UPDATE users SET exp=exp+$amount, level=level+1 WHERE id=$id",
           {
@@ -82,7 +82,7 @@ export async function levelupCheck(db: Database, member: GuildMember): Promise<L
 export async function levelupCheckAll(db: Database, guild: Guild): Promise<LevelupCheckStatus[]> {
   return new Promise((resolve, reject) => {
 
-    db.all("SELECT level, exp FROM users", async (err: Error | null, rows: UsersTableRow[]) => {
+    db.all("SELECT id, level, exp FROM users", async (err: Error | null, rows: UsersTableRow[]) => {
       if (err) throw err;
 
       resolve(Promise.all(rows.map(async (row) => {
@@ -101,7 +101,7 @@ export async function levelupCheckAll(db: Database, guild: Guild): Promise<Level
           if (row.level % 3 === 0 && row.level > 0 && row.level / 3 <= ranks.size - 1) {
             const newRank = getRank(row.level)!;
             const oldRank = getRank(row.level - 1)!;
-            const member = guild.members.cache.get(row.id)!;
+            const member = await guild.members.fetch({ user: row.id });
 
             await upgradeRank(db, member, oldRank, newRank);
             return LevelupCheckStatus.RANKUP;

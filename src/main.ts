@@ -4,6 +4,7 @@ import { IntentsBitField, Message, EmbedBuilder } from "discord.js";
 import { Client } from "discordx";
 import { config as load_envs } from 'dotenv';
 import __splite3_pkg from 'sqlite3';
+import { UsersTableRow } from "./assets/DatabaseTypes.js";
 const sqlite3 = __splite3_pkg.verbose();
 import { levelupCheck } from "./utils/LevelupChecks.js";
 import { StringFormatter, FormatterMode } from './utils/StringFormatter.js';
@@ -30,11 +31,11 @@ export const client = new Client({
 });
 
 /**SQLite Database */
-export const db = new sqlite3.Database('main.db');
+export const db = new sqlite3.Database('C:\\Users\\hankv\\Downloads\\main.db');
 
 client.once("ready", async () => {
   // Make sure all guilds are cached
-  // await bot.guilds.fetch();
+  await client.guilds.fetch();
 
   // Synchronize applications commands with Discord
   client.user!.setStatus('dnd');
